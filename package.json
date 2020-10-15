@@ -4,7 +4,7 @@
   "description": "PKCE helper, generates verify & challenge with preconfigured type (HMAC or hash) algorithm and digest encoding using Web Crypto API",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rm -rf dist && tsc && cp dist/index.d.ts ./",
+    "build": "rm -rf dist && tsc && cp dist/index.d.ts ./ && cp dist/index.js ./build/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
