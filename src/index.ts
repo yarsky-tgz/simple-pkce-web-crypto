@@ -2,7 +2,7 @@ import { createPKCEHelper as originalCreatePKCEHelper, PKCEHelper } from 'abstra
 
 export type { PKCEHelper, PKCEChallenge } from 'abstract-pkce'
 
-export type PKCEHelperLegacyBrowser = PKCEHelper<Promise<string>>
+export type PKCEHelperWebCrypto = PKCEHelper<Promise<string>>
 
 const DEFAULT_ALGORITHM = 'SHA-256'
 const BASE64_ENCODING = 'base64'
@@ -40,7 +40,7 @@ const bufferToHex: (buffer: ArrayBuffer) => string = (buffer: ArrayBuffer) => Ar
 
 export const createPKCEHelper: (
   algorithm: string, encoding: PKCEEncoding, isHMAC?: boolean,
-) => PKCEHelperLegacyBrowser = (
+) => PKCEHelperWebCrypto = (
   algorithm = DEFAULT_ALGORITHM, encoding = BASE64_ENCODING, isHMAC = true,
 ) => {
   const convert = encoding === HEX_ENCODING ? bufferToHex : bufferToBase64
