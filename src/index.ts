@@ -36,7 +36,7 @@ const subtle: SubtleCrypto = crypto.subtle || ((crypto as unknown) as { webkitSu
 const bufferToBase64: (buffer: ArrayBuffer) => string = (buffer) => window
   .btoa(String.fromCharCode(...Array.from(new Uint8Array(buffer))))
 const bufferToHex: (buffer: ArrayBuffer) => string = (buffer: ArrayBuffer) => Array.prototype.map
-  .call(new Uint8Array(buffer), (x) => (`00${x.toString(16)}`).slice(-2)).join('')
+  .call(new Uint8Array(buffer), (byte: number) => (`00${byte.toString(16)}`).slice(-2)).join('')
 
 export const createPKCEHelper: (
   algorithm: string, encoding: PKCEEncoding, isHMAC?: boolean,
