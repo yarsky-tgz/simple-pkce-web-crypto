@@ -5,7 +5,14 @@ export type { PKCEHelper, PKCEChallenge } from 'abstract-pkce'
 export type PKCEHelperLegacyBrowser = PKCEHelper<Promise<string>>
 
 const DEFAULT_ALGORITHM = 'SHA-256'
-const DEFAULT_ENCODING = 'base64'
+const BASE64_ENCODING = 'base64'
+const HEX_ENCODING = 'hex'
+const HMAC_ALGORITHM = 'HMAC'
+const KEY_FORMAT = 'raw'
+const KEY_USAGE_SIGN = 'sign'
+const KEY_USAGE_VERIFY = 'verify'
+
+export type PKCEEncoding = 'hex' | 'base64'
 
 interface WindowsPromise<T> {
   oncomplete?(payload: T): void,
@@ -32,26 +39,26 @@ const bufferToHex: (buffer: ArrayBuffer) => string = (buffer: ArrayBuffer) => Ar
   .call(new Uint8Array(buffer), (x) => (`00${x.toString(16)}`).slice(-2)).join('')
 
 export const createPKCEHelper: (
-  algorithm: string, encoding: 'hex' | 'base64', isHMAC?: boolean,
+  algorithm: string, encoding: PKCEEncoding, isHMAC?: boolean,
 ) => PKCEHelperLegacyBrowser = (
-  algorithm = DEFAULT_ALGORITHM, encoding = DEFAULT_ENCODING, isHMAC = true,
+  algorithm = DEFAULT_ALGORITHM, encoding = BASE64_ENCODING, isHMAC = true,
 ) => {
-  const convert = encoding === 'hex' ? bufferToHex : bufferToBase64
+  const convert = encoding === HEX_ENCODING ? bufferToHex : bufferToBase64
+  const encoder = new TextEncoder()
 
   return originalCreatePKCEHelper<Promise<string>>({
     getChallenge: isHMAC
       ? (verifier: string) => {
-        const encoder = new TextEncoder()
         const importKeyOperation: Promise<CryptoKey> | WindowsPromise<CryptoKey> = subtle
-          .importKey('raw', encoder.encode(verifier), {
-            name: 'HMAC',
+          .importKey(KEY_FORMAT, encoder.encode(verifier), {
+            name: HMAC_ALGORITHM,
             hash: { name: algorithm },
-          }, false, ['sign', 'verify'])
+          }, false, [KEY_USAGE_SIGN, KEY_USAGE_VERIFY])
 
         return ('then' in importKeyOperation ? importKeyOperation : promisify<CryptoKey>(importKeyOperation))
           .then((key: CryptoKey): Promise<ArrayBuffer> => {
             const subtleSignOperation: Promise<ArrayBuffer> | WindowsPromise<ArrayBuffer> = subtle.sign(
-              'HMAC', key, new Uint8Array(0),
+              HMAC_ALGORITHM, key, new Uint8Array(0),
             )
 
             return 'then' in subtleSignOperation ? subtleSignOperation : promisify(subtleSignOperation)
@@ -60,7 +67,7 @@ export const createPKCEHelper: (
       }
       : (verifier: string) => {
         const digestOperation: Promise<ArrayBuffer> | WindowsPromise<ArrayBuffer> = subtle.digest(
-          { name: algorithm }, new TextEncoder().encode(verifier),
+          { name: algorithm }, encoder.encode(verifier),
         )
         const bufferPromise: Promise<ArrayBuffer> = 'then' in digestOperation
           ? digestOperation
