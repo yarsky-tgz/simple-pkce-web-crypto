@@ -1,6 +1,6 @@
 {
   "name": "simple-pkce-web-crypto",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "PKCE helper, generates verify & challenge with preconfigured type (HMAC or hash) algorithm and digest encoding using Web Crypto API",
   "main": "dist/index.js",
   "scripts": {
